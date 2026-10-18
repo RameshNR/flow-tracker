@@ -52,8 +52,43 @@ final class FlowSync {
     /** A call from one tracked method to another, at a 1-based line of the caller. */
     private record Call(Object callee, int line) {}
 
+    /**
+     * The calls between a flow's saved methods: {@link #link}s (each caller's calls in source order) and, for
+     * each link, the 1-based line of the caller the call is on (used to nest the callee in the Original Log).
+     */
+    record Calls(Set<String> links, Map<String, Integer> lines) {
+        static final Calls NONE = new Calls(Set.of(), Map.of());
+    }
+
+    /**
+     * The calls plus those connected by hand ({@link FlowEntry#calls}): each manual connection is a link from
+     * the line's method to the chosen method, at that line. Connections to methods no longer in the flow are
+     * skipped.
+     */
+    static Calls withManual(Calls calls, List<FlowEntry> entries) {
+        Set<String> keys = new HashSet<>();
+        boolean any = false;
+        for (FlowEntry e : entries) {
+            keys.add(methodKey(e));
+            any |= !e.calls.isEmpty();
+        }
+        if (!any) return calls;
+        Set<String> links = new LinkedHashSet<>(calls.links());
+        Map<String, Integer> lines = new HashMap<>(calls.lines());
+        for (FlowEntry e : entries) {
+            for (String callee : e.calls) {
+                String from = methodKey(e);
+                if (!keys.contains(callee) || callee.equals(from)) continue;
+                String link = link(from, callee);
+                links.add(link);
+                lines.merge(link, e.line, Math::min);
+            }
+        }
+        return new Calls(links, lines);
+    }
+
     /** Result of one analysis: lines in call order, plus the calls between tracked methods. */
-    private record Analysis(List<FlowEntry> order, Set<String> links) {}
+    private record Analysis(List<FlowEntry> order, Calls calls) {}
 
     /** Key of the method a line is in, as used by {@link #link}: file URL + method label. */
     static String methodKey(FlowEntry e) {
@@ -78,9 +113,9 @@ final class FlowSync {
      * the same order, to {@code done} on the UI thread. Used by Copy All Flows: only the active flow's links
      * are kept up to date in the store.
      */
-    static void linksFor(Project project, List<List<FlowEntry>> flows, Consumer<List<Set<String>>> done) {
+    static void callsFor(Project project, List<List<FlowEntry>> flows, Consumer<List<Calls>> done) {
         ReadAction.nonBlocking(() -> flows.stream()
-                        .map(f -> f.size() < 2 ? Set.<String>of() : compute(project, f).links())
+                        .map(f -> f.size() < 2 ? Calls.NONE : compute(project, f).calls())
                         .toList())
                 .inSmartMode(project)
                 .expireWith(project)
@@ -98,7 +133,7 @@ final class FlowSync {
         FlowStore store = FlowStore.get(project);
         List<FlowEntry> snapshot = store.getEntries();
         if (snapshot.size() < 2) {
-            store.setCallLinks(Set.of());
+            store.setCalls(Calls.NONE);
             return;
         }
         ReadAction.nonBlocking(() -> compute(project, snapshot))
@@ -108,7 +143,7 @@ final class FlowSync {
                 .finishOnUiThread(ModalityState.defaultModalityState(), result -> {
                     List<FlowEntry> now = store.getEntries();
                     if (!now.equals(snapshot)) return;
-                    store.setCallLinks(result.links());
+                    store.setCalls(result.calls());
                     if (store.isSyncFiles() && !result.order().equals(now)) store.setOrder(result.order());
                 })
                 .submit(AppExecutorUtil.getAppExecutorService());
@@ -141,6 +176,22 @@ final class FlowSync {
             for (Call c : found) called.add(c.callee);
         }
 
+        // Calls connected by hand, from the line's method to the chosen method, at that line.
+        Map<String, Object> byKey = new HashMap<>();
+        for (Map.Entry<Object, List<FlowEntry>> g : groups.entrySet()) byKey.putIfAbsent(methodKey(g.getValue().get(0)), g.getKey());
+        for (Map.Entry<Object, List<FlowEntry>> g : groups.entrySet()) {
+            for (FlowEntry e : g.getValue()) {
+                for (String target : e.calls) {
+                    Object callee = byKey.get(target);
+                    if (callee == null || callee.equals(g.getKey())) continue;
+                    List<Call> list = calls.computeIfAbsent(g.getKey(), k -> new ArrayList<>());
+                    if (list.stream().noneMatch(c -> c.callee.equals(callee))) list.add(new Call(callee, e.line));
+                    called.add(callee);
+                }
+            }
+        }
+        for (List<Call> list : calls.values()) list.sort(Comparator.comparingInt(Call::line));
+
         List<FlowEntry> out = new ArrayList<>(entries.size());
         Set<Object> visited = new HashSet<>();
         // Entry points first (methods no other tracked method calls), in their current order.
@@ -151,11 +202,16 @@ final class FlowSync {
         for (Object key : groups.keySet()) emit(key, groups, calls, visited, out);
 
         Set<String> links = new LinkedHashSet<>();
+        Map<String, Integer> lines = new HashMap<>();
         for (Map.Entry<Object, List<Call>> c : calls.entrySet()) {
             String from = methodKey(groups.get(c.getKey()).get(0));
-            for (Call call : c.getValue()) links.add(link(from, methodKey(groups.get(call.callee).get(0))));
+            for (Call call : c.getValue()) {
+                String link = link(from, methodKey(groups.get(call.callee).get(0)));
+                links.add(link);
+                lines.putIfAbsent(link, call.line);
+            }
         }
-        return new Analysis(out, links);
+        return new Analysis(out, new Calls(links, lines));
     }
 
     /** Adds a method's lines, inserting each called method right after the line that calls it. */

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -77,22 +78,24 @@ public final class FlowStore implements PersistentStateComponent<FlowStore.State
         /** true = Flat View is enabled. */
         public boolean flatView = false;
         /** true = lines are kept in call order automatically (caller first, then the methods it calls). */
-        public boolean syncFiles = false;
+        public boolean syncFiles = true;
         /** true = copying in Flat View produces the compact project / file / method log. */
         public boolean optimizeFlatLog = false;
         /** true = Copy produces a Markdown document (headings, code blocks, notes, flow diagram). */
-        public boolean copyMarkdown = false;
+        public boolean copyMarkdown = true;
         /** true = the Markdown copy draws a Mermaid sequence diagram instead of a flowchart. */
-        public boolean sequenceDiagram = false;
+        public boolean sequenceDiagram = true;
         /** true = the toolbar's Copy button copies every flow, not only the active one. */
-        public boolean copyAllFlows = false;
+        public boolean copyAllFlows = true;
+        /** true = the Original Log nests each called method's lines under the line that calls it. */
+        public boolean nestedCallLog = true;
         /** Deleted lines and flows, newest first. */
         public List<BinItem> recycleBin = new ArrayList<>();
     }
 
     private State state = new State();
     /** Calls between saved methods, from the last background analysis (not saved; see FlowSync). */
-    private volatile Set<String> callLinks = Set.of();
+    private volatile FlowSync.Calls calls = FlowSync.Calls.NONE;
     private final List<Runnable> listeners = new CopyOnWriteArrayList<>();
     /** The line the walk-through (Next / Previous Step) is on; not saved. */
     private @Nullable FlowEntry walkEntry;
@@ -353,7 +356,7 @@ public final class FlowStore implements PersistentStateComponent<FlowStore.State
     private void resetForNewFlow() {
         undoStack.clear();
         redoStack.clear();
-        callLinks = Set.of();
+        calls = FlowSync.Calls.NONE;
         setWalkEntry(null);
     }
 
@@ -490,6 +493,16 @@ public final class FlowStore implements PersistentStateComponent<FlowStore.State
         fire();
     }
 
+    public boolean isNestedCallLog() {
+        return state.nestedCallLog;
+    }
+
+    public void setNestedCallLog(boolean nested) {
+        if (state.nestedCallLog == nested) return;
+        state.nestedCallLog = nested;
+        fire();
+    }
+
     public boolean isCopyAllFlows() {
         return state.copyAllFlows;
     }
@@ -501,19 +514,39 @@ public final class FlowStore implements PersistentStateComponent<FlowStore.State
     }
 
     public Set<String> getCallLinks() {
-        return callLinks;
+        return getCalls().links();
+    }
+
+    /**
+     * The calls of the active flow: those found by the last analysis plus the ones connected by hand (with
+     * the line each call is on).
+     */
+    public FlowSync.Calls getCalls() {
+        return FlowSync.withManual(calls, lines());
     }
 
     /**
      * Stores the analysis result, keeping its order (each caller's calls in source order). Does not notify
      * listeners: nothing on screen depends on it.
      */
-    public void setCallLinks(Set<String> links) {
-        callLinks = Collections.unmodifiableSet(new LinkedHashSet<>(links));
+    public void setCalls(FlowSync.Calls result) {
+        calls = new FlowSync.Calls(Collections.unmodifiableSet(new LinkedHashSet<>(result.links())), Map.copyOf(result.lines()));
     }
 
     public void setNote(FlowEntry entry, String note) {
         entry.note = note == null ? "" : note;
+        fire();
+    }
+
+    /** Connects a line to a method it calls (by hand), or removes that connection when it exists. */
+    public void toggleConnection(FlowEntry caller, String calleeKey) {
+        if (!caller.calls.remove(calleeKey)) caller.calls.add(calleeKey);
+        fire();
+    }
+
+    public void clearConnections(FlowEntry caller) {
+        if (caller.calls.isEmpty()) return;
+        caller.calls.clear();
         fire();
     }
 

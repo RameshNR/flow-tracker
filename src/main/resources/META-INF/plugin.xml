@@ -2,12 +2,22 @@
     <!-- Permanent Marketplace ID: never change it after publishing. (The Java package name is separate.) -->
     <id>io.github.rameshnr.flowtracker</id>
     <name>Flow Tracker</name>
-    <vendor url="https://github.com/RameshNR/flow-tracker">Shopping Team 7</vendor>
+    <vendor url="https://github.com/RameshNR/flow-tracker">RameshNR</vendor>
     <!-- <version> and <idea-version since-build> are filled in by Gradle (build.gradle.kts). -->
 
     <!-- <description> comes from src/main/plugin-description.html (see build.gradle.kts). -->
 
     <change-notes><![CDATA[
+<h3>1.2.0</h3>
+<ul>
+  <li>Nest Calls in Original Log: each called method's lines sit under the line that calls it, in Grouped and
+      Flat View (on by default; a Settings switch). The project is named only when it changes.</li>
+  <li>Connect Call To: join a line by hand to the method it reaches (e.g. an API call into another project);
+      used by Sync, the diagrams and the Original Log, and saved with the flow.</li>
+  <li>Sync Files, Copy as Markdown, Sequence Diagram and Copy All Flows are on by default.</li>
+  <li>The Flows popup lines up with the flow button, with a small gap below the buttons for all popups.</li>
+  <li>Vendor: RameshNR.</li>
+</ul>
 <h3>1.1.1</h3>
 <ul>
   <li>New plugin ID for JetBrains Marketplace (<code>io.github.rameshnr.flowtracker</code>). If you installed

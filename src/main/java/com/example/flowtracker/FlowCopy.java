@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 
 import java.awt.datatransfer.StringSelection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -31,15 +32,21 @@ final class FlowCopy {
      */
     static String textFor(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all, Set<String> links,
                           String title) {
-        return format(store, picked, all, links, title, store.isCopyMarkdown());
+        return textFor(store, picked, all, new FlowSync.Calls(links, Map.of()), title);
+    }
+
+    /** @param calls calls between the flow's methods (diagrams; nested Original Log) */
+    static String textFor(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all, FlowSync.Calls calls,
+                          String title) {
+        return format(store, picked, all, calls, title, store.isCopyMarkdown());
     }
 
     /** @param markdown true = a Markdown document (with the Original Log), false = the plain copy */
-    private static String format(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all, Set<String> links,
+    private static String format(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all, FlowSync.Calls calls,
                                  String title, boolean markdown) {
         if (markdown) {
-            String md = FlowMarkdown.toMarkdown(picked, store.isFlatView(), links, store.isSequenceDiagram(), title);
-            return picked.isEmpty() ? md : md + originalLog(store, picked, all);
+            String md = FlowMarkdown.toMarkdown(picked, store.isFlatView(), calls.links(), store.isSequenceDiagram(), title);
+            return picked.isEmpty() ? md : md + originalLog(store, picked, all, calls);
         }
         return plainText(store, picked, all);
     }
@@ -52,19 +59,24 @@ final class FlowCopy {
     }
 
     /**
-     * The end of a Markdown flow: the same lines as the plain copy of the current view (what Copy gives with
-     * Copy as Markdown off), in a text block, so the original log travels with the document.
+     * The end of a Markdown flow: the lines as plain text, in a text block, so the original log travels with
+     * the document. With "Nest Calls in Original Log" on, each called method's lines sit under the line that
+     * calls it (see {@link FlowCallLog}); off, it is the plain copy of the current view (what Copy gives with
+     * Copy as Markdown off).
      */
-    private static String originalLog(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all) {
-        String log = plainText(store, picked, all);
+    private static String originalLog(FlowStore store, List<FlowEntry> picked, List<FlowEntry> all, FlowSync.Calls calls) {
+        boolean nested = store.isNestedCallLog();
+        String log = nested ? FlowCallLog.render(picked, store.isFlatView(), all, calls) : plainText(store, picked, all);
         String fence = log.contains("```") ? "````" : "```";
-        return "## 📜 Original Log\n\n_" + (store.isFlatView() ? "Flat View" : "Grouped View") + " copy, as plain text._\n\n"
+        return "## 📜 Original Log\n\n_" + (store.isFlatView() ? "Flat View" : "Grouped View")
+                + (nested ? " copy, as plain text, with each call nested under the line that makes it._\n\n"
+                : " copy, as plain text._\n\n")
                 + fence + "text\n" + log + (log.endsWith("\n") ? "" : "\n") + fence + "\n";
     }
 
     /** The given lines of the active flow, titled with the flow's name. */
     static String textFor(FlowStore store, List<FlowEntry> picked) {
-        return textFor(store, picked, store.getEntries(), store.getCallLinks(), store.getActiveFlowName());
+        return textFor(store, picked, store.getEntries(), store.getCalls(), store.getActiveFlowName());
     }
 
     static void toClipboard(String text) {
@@ -87,7 +99,7 @@ final class FlowCopy {
             notify(project, "Nothing to copy: no flow has lines yet", NotificationType.INFORMATION);
             return;
         }
-        FlowSync.linksFor(project, flows.stream().map(f -> f.entries).toList(), links -> {
+        FlowSync.callsFor(project, flows.stream().map(f -> f.entries).toList(), calls -> {
             StringBuilder out = new StringBuilder();
             int lines = 0;
             for (int i = 0; i < flows.size(); i++) {
@@ -97,7 +109,7 @@ final class FlowCopy {
                     out.append("===== ").append(f.name).append(" (").append(f.entries.size())
                             .append(f.entries.size() == 1 ? " line" : " lines").append(") =====\n\n");
                 }
-                out.append(format(store, f.entries, f.entries, links.get(i), f.name, markdown));
+                out.append(format(store, f.entries, f.entries, FlowSync.withManual(calls.get(i), f.entries), f.name, markdown));
                 lines += f.entries.size();
             }
             done.accept(new AllFlows(out.toString(), flows.size(), lines));
@@ -129,7 +141,7 @@ final class FlowCopy {
             return;
         }
         String name = store.getActiveFlowName();
-        openScratch(project, name, format(store, picked, store.getEntries(), store.getCallLinks(), name, true));
+        openScratch(project, name, format(store, picked, store.getEntries(), store.getCalls(), name, true));
     }
 
     private static void openScratch(Project project, String name, String text) {

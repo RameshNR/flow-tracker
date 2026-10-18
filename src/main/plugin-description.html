@@ -58,6 +58,8 @@ them in <b>call order</b> automatically, and copies the whole flow as text, a co
   <li><b>Double-click</b> a line to jump to it. <b>Ctrl+C</b> copies, <b>Delete</b> removes.</li>
   <li><b>Tags</b>: mark lines as Bug, Important or Question.</li>
   <li>Lines that no longer match the code get a <b>warning</b> and can be re-linked in one click.</li>
+  <li><b>Connect Call To</b>: join a line by hand to the method it reaches when the code can't show it, such as
+      an API call handled in another project.</li>
 </ul>
 
 <!--img--><p><img src="@IMAGES@/flow-tracker-hover-actions.png" alt="Hover action bar on a row: move, copy, note and delete" width="640"></p><!--/img-->
@@ -82,7 +84,7 @@ them in <b>call order</b> automatically, and copies the whole flow as text, a co
       <code>line | code</code> rows.</li>
   <li><b>Copy as Markdown</b>: a <code>.md</code> document with a summary table, Mermaid diagrams of the real
       calls (flowchart or sequence diagram), each method's lines as a table with highlighted code, and the
-      Original Log at the end.</li>
+      Original Log at the end, with each call nested under the line that makes it.</li>
 </ul>
 
 <!--img--><p><img src="@IMAGES@/flow-tracker-settings.png" alt="Settings: Sync Files, copy formats, Copy All Flows, Recycle Bin, Info" width="640"></p><!--/img-->

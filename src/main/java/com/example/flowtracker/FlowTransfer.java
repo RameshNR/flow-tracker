@@ -57,6 +57,8 @@ final class FlowTransfer {
         String code;
         String note;
         String tag;
+        /** Methods this line calls, connected by hand: "relative/path/File.java#method()". */
+        List<String> calls;
     }
 
     /** A read flow: its name, the lines, and how many of them point to files this project doesn't have. */
@@ -81,6 +83,13 @@ final class FlowTransfer {
             l.code = e.text;
             l.note = blankToNull(e.note);
             l.tag = blankToNull(e.tag);
+            if (!e.calls.isEmpty()) {
+                l.calls = new ArrayList<>();
+                for (String key : e.calls) {
+                    int hash = key.lastIndexOf('#');
+                    if (hash > 0) l.calls.add(relativePath(project, key.substring(0, hash)) + key.substring(hash));
+                }
+            }
             data.lines.add(l);
         }
         Files.writeString(target, gson().toJson(data) + "\n", StandardCharsets.UTF_8);
@@ -99,6 +108,8 @@ final class FlowTransfer {
 
         List<FlowEntry> entries = new ArrayList<>();
         int missing = 0;
+        java.util.Map<String, String> urlByPath = new java.util.HashMap<>(); // to resolve the connections below
+        List<List<String>> connections = new ArrayList<>();
         for (Line l : data.lines) {
             if (l == null || l.code == null) continue;
             String fileName = l.file != null ? l.file : l.path == null ? "?" : l.path.replaceAll(".*/", "");
@@ -111,8 +122,20 @@ final class FlowTransfer {
             e.note = l.note == null ? "" : l.note;
             e.tag = FlowTag.byId(l.tag) == null ? "" : l.tag;
             entries.add(e);
+            if (l.path != null) urlByPath.put(l.path, url);
+            connections.add(l.calls == null ? List.of() : l.calls);
         }
         String name = data.name == null || data.name.isBlank() ? defaultName(source) : data.name;
+        // Connections point at methods by path: map each path to the file it was found at on this machine.
+        for (int i = 0; i < entries.size(); i++) {
+            for (String c : connections.get(i)) {
+                int hash = c.lastIndexOf('#');
+                if (hash <= 0) continue;
+                String path = c.substring(0, hash);
+                String url = urlByPath.getOrDefault(path, VfsUtilCore.pathToUrl(absolute(project, path)));
+                entries.get(i).calls.add(url + c.substring(hash));
+            }
+        }
         return new Imported(name, entries, missing);
     }
 

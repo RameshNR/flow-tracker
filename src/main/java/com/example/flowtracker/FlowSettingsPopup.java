@@ -48,6 +48,7 @@ final class FlowSettingsPopup {
         Switch markdown = new Switch(store.isCopyMarkdown());
         Switch sequence = new Switch(store.isSequenceDiagram());
         Switch copyAll = new Switch(store.isCopyAllFlows());
+        Switch nestedLog = new Switch(store.isNestedCallLog());
 
         panel.add(sectionLabel("ORDERING"));
         panel.add(row(FlowTheme.ICON_SYNC, "Sync Files",
@@ -80,6 +81,12 @@ final class FlowSettingsPopup {
                         + ", one after the other under its name, instead of only the current one. "
                         + "Ctrl+C still copies the selected lines.",
                 copyAll, store::setCopyAllFlows));
+        panel.add(Box.createVerticalStrut(JBUI.scale(2)));
+        panel.add(row(FlowTheme.ICON_LIST, "Nest Calls in Original Log",
+                "In the Markdown copy's Original Log, put each called method's lines right under the line that "
+                        + "calls it, indented like a call stack (Grouped and Flat View). Off: the plain file / method "
+                        + "list or numbered steps.",
+                nestedLog, store::setNestedCallLog));
 
         JBPopup[] holder = new JBPopup[1];
         panel.add(sectionLabel("DELETED"));
@@ -117,13 +124,14 @@ final class FlowSettingsPopup {
             markdown.setOn(store.isCopyMarkdown());
             sequence.setOn(store.isSequenceDiagram());
             copyAll.setOn(store.isCopyAllFlows());
+            nestedLog.setOn(store.isNestedCallLog());
         };
         store.addListener(syncSwitches);
         Disposer.register(popup, () -> store.removeListener(syncSwitches));
 
         // Below the gear button, right edges aligned, so the popup opens towards the panel.
         Dimension size = popup.getContent().getPreferredSize();
-        popup.show(new RelativePoint(anchor, new Point(anchor.getWidth() - size.width, anchor.getHeight() + JBUI.scale(4))));
+        popup.show(new RelativePoint(anchor, new Point(anchor.getWidth() - size.width, anchor.getHeight() + FlowTheme.popupGap())));
     }
 
     private static JComponent sectionLabel(String text) {

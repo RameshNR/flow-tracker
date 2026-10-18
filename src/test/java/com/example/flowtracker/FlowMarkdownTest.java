@@ -156,6 +156,7 @@ class FlowMarkdownTest {
         List<FlowEntry> lines = List.of(a, b);
         FlowStore store = new FlowStore();
         store.setCopyMarkdown(true);
+        store.setNestedCallLog(false); // the plain layout; the nested one is tested in FlowCallLogTest
 
         String grouped = FlowCopy.textFor(store, lines, lines, Set.of(), "Flow 1: Checkout bug");
         assertTrue(grouped.startsWith("# 🧭 Flow 1: Checkout bug"), grouped);

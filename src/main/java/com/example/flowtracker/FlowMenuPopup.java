@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.components.JBList;
 import com.intellij.util.ui.EmptyIcon;
 import com.intellij.util.ui.JBUI;
@@ -126,7 +127,8 @@ final class FlowMenuPopup {
         Runnable sync = () -> SwingUtilities.invokeLater(reload);
         store.addListener(sync);
         Disposer.register(popup[0], () -> store.removeListener(sync));
-        popup[0].showUnderneathOf(anchor);
+        // Left edge on the button's left edge, a small gap below it.
+        popup[0].show(new RelativePoint(anchor, new Point(0, anchor.getHeight() + FlowTheme.popupGap())));
     }
 
     private static void move(JBList<FlowStore.Flow> list, FlowStore store, int delta) {

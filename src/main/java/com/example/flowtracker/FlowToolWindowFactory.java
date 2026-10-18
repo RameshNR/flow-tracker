@@ -286,7 +286,8 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
                     + "<br>Optimize Flat View Log: " + onOff(store.isOptimizeFlatLog())
                     + "<br>Copy as Markdown: " + onOff(store.isCopyMarkdown())
                     + "<br>Sequence Diagram: " + onOff(store.isSequenceDiagram())
-                    + "<br>Copy All Flows: " + onOff(store.isCopyAllFlows()) + "</html>");
+                    + "<br>Copy All Flows: " + onOff(store.isCopyAllFlows())
+                    + "<br>Nest Calls in Original Log: " + onOff(store.isNestedCallLog()) + "</html>");
             flowMenu.setText(StringUtil.shortenTextWithEllipsis(store.getActiveFlowName(), 24, 0) + "  \u25BE");
             openMarkdown.setToolTipText(store.isCopyAllFlows()
                     ? "Open all flows as a Markdown file with the preview (Copy All Flows is on)"
@@ -1251,6 +1252,7 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
                     w += JBUI.scale(10) + FlowTheme.ICON_WARNING.getIconWidth() + JBUI.scale(4)
                             + getFontMetrics(tagFont.deriveFont(Font.ITALIC)).stringWidth(problemText(problem));
                 }
+                for (String c : connections(e)) w += tagSpace(c);
                 if (hasNote(e)) w += getFontMetrics(labelFont.deriveFont(Font.ITALIC)).stringWidth(noteText(e));
                 return w;
             }
@@ -1319,6 +1321,14 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
 
         private static String flatPrefix(FlowEntry e) {
             return FlowFormat.flatLabel(e) + "   ";
+        }
+
+        /** "→ search()" for each method this line is connected to by hand. */
+        private static List<String> connections(FlowEntry e) {
+            if (e.calls.isEmpty()) return List.of();
+            List<String> out = new ArrayList<>();
+            for (String key : e.calls) out.add("\u2192 " + key.substring(key.lastIndexOf('#') + 1));
+            return out;
         }
 
         private static boolean hasNote(FlowEntry e) {
@@ -1400,6 +1410,7 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
             FlowTag tag = FlowTag.of(e);
             if (tag != null) x = paintPill(g, tag.label, tag.bg, tag.fg, x, y0, h0);
             if (problem != null) x = paintProblem(g, problem, x, y0, h0);
+            for (String c : connections(e)) x = paintPill(g, c, FlowTheme.TAG_BG, FlowTheme.ACCENT, x, y0, h0);
 
             if (hasNote(e)) {
                 Font italic = labelFont.deriveFont(Font.ITALIC);
@@ -1479,6 +1490,7 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
                     AllIcons.Actions.Edit, true, editNote));
             group.add(menuAction("Jump to Source", AllIcons.Actions.EditSource, true, () -> navigate(project, line)));
             group.add(menuAction("Walk from Here", FlowTheme.ICON_NEXT, true, () -> FlowWalk.show(project, line)));
+            group.add(connectMenu(store, line, reselect));
         }
 
         // Colour tag for every selected line.
@@ -1537,7 +1549,7 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
             String name = askFlowName(project, "Rename Flow", start);
             if (name != null) store.renameFlow(name);
         }));
-        items.add(new FlowMenuPopup.Item(names.size() > 1 ? "Delete Flow" : "Delete Flow (empties it)", AllIcons.Actions.GC, true, () -> {
+        items.add(new FlowMenuPopup.Item("Delete Flow", AllIcons.Actions.GC, true, () -> {
             int lines = store.getEntries().size();
             String what = names.size() > 1
                     ? "Delete the flow \u201c" + store.getActiveFlowName() + "\u201d"
@@ -1620,6 +1632,37 @@ public final class FlowToolWindowFactory implements ToolWindowFactory, DumbAware
 
     private static void notify(Project project, String text, NotificationType type) {
         FlowCopy.notify(project, text, type);
+    }
+
+    /**
+     * "Connect Call To": connect this line by hand to a method it calls, for calls the code doesn't show
+     * (e.g. an API request handled in another project). Lists the flow's other methods, connected ones
+     * checked; picking one again removes the connection.
+     */
+    private static AnAction connectMenu(FlowStore store, FlowEntry line, AtomicReference<Object> reselect) {
+        DefaultActionGroup menu = DefaultActionGroup.createPopupGroup(() -> "Connect Call To");
+        menu.getTemplatePresentation().setIcon(FlowTheme.ICON_NEXT);
+        String own = FlowSync.methodKey(line);
+        Set<String> listed = new LinkedHashSet<>();
+        for (FlowEntry e : store.getEntries()) {
+            String key = FlowSync.methodKey(e);
+            if (key.equals(own) || !listed.add(key)) continue;
+            String label = FlowFormat.methodLabel(e) + "  \u2014  " + e.fileName
+                    + (e.projectName == null || e.projectName.isBlank() ? "" : "  (" + e.projectName + ")");
+            menu.add(menuAction(label, line.calls.contains(key) ? AllIcons.Actions.Checked : null, true, () -> {
+                reselect.set(line);
+                store.toggleConnection(line, key);
+            }));
+        }
+        if (listed.isEmpty()) menu.add(menuAction("Add lines of the called method first", null, false, () -> {}));
+        if (!line.calls.isEmpty()) {
+            menu.addSeparator();
+            menu.add(menuAction("Remove Connections from This Line", AllIcons.Actions.GC, true, () -> {
+                reselect.set(line);
+                store.clearConnections(line);
+            }));
+        }
+        return menu;
     }
 
     private static AnAction menuAction(String text, @Nullable Icon icon, boolean enabled, Runnable run) {

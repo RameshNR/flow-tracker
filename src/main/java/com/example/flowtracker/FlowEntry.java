@@ -14,6 +14,11 @@ public class FlowEntry {
     public String projectName = "";
     /** Optional colour tag: "" (none), "bug", "important" or "question" (see {@link FlowTag}). */
     public String tag = "";
+    /**
+     * Methods this line calls, connected by hand (for calls the code doesn't show, e.g. an API request that
+     * reaches another project). Each is a method key: {@link FlowSync#methodKey}.
+     */
+    public java.util.List<String> calls = new java.util.ArrayList<>();
 
     public FlowEntry() {}
 

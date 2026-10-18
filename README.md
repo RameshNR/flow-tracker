@@ -10,7 +10,7 @@ NOTE: Before the first build, set your own IntelliJ IDEA installation path in `b
 
 
 
-Flow Tracker is an IntelliJ IDEA plugin by **Shopping Team 7** for following a code path through a Java, Kotlin or Java web project (JSP, JavaScript, TLD and more). While you read code, you click the lines that matter (or let the debugger record them). Flow Tracker collects them in a side panel (grouped by file and method, or as one flat sequence), keeps them in **call order** automatically, and copies the whole flow as text, a compact log or a Markdown document. Flows have names, can be exported as `.flow.json` files to share with your team, and can be replayed step by step in the editor.
+Flow Tracker is an IntelliJ IDEA plugin by **RameshNR** for following a code path through a Java, Kotlin or Java web project (JSP, JavaScript, TLD and more). While you read code, you click the lines that matter (or let the debugger record them). Flow Tracker collects them in a side panel (grouped by file and method, or as one flat sequence), keeps them in **call order** automatically, and copies the whole flow as text, a compact log or a Markdown document. Flows have names, can be exported as `.flow.json` files to share with your team, and can be replayed step by step in the editor.
 
 This is a Java Gradle project built with **JDK 25** against **IntelliJ IDEA 2026.2**. It uses the Gradle wrapper (`gradlew.bat`) to provide the right Gradle version, so you don't need to install Gradle.
 
@@ -38,7 +38,7 @@ Make sure you have the following installed:
 | Java (plugin code) | 25 | `build.gradle.kts` → `java.toolchain` |
 | Gradle | 9.6.0 | `gradle/wrapper/gradle-wrapper.properties` |
 | IntelliJ Platform Gradle Plugin | 2.19.0 | `build.gradle.kts` → `plugins` |
-| Plugin version | 1.1.1 | `build.gradle.kts` → `version` |
+| Plugin version | 1.2.0 | `build.gradle.kts` → `version` |
 | Plugin ID | `io.github.rameshnr.flowtracker` (never change it once published) | `plugin.xml` → `<id>` |
 
 
@@ -126,16 +126,16 @@ Check the folder: it must contain `product-info.json`. Write the path in `build.
 The installable plugin is written to:
 
 ```
-build\distributions\flow-tracker-1.1.1.zip
+build\distributions\flow-tracker-1.2.0.zip
 ```
 
 Install it in IntelliJ IDEA:
 
 - **Settings** → **Plugins** → ⚙️ → **Install Plugin from Disk…**
-- Select `build\distributions\flow-tracker-1.1.1.zip`
+- Select `build\distributions\flow-tracker-1.2.0.zip`
 - Restart the IDE when asked
 
-To release a new version, change `version = "1.1.1"` in `build.gradle.kts`, add its change notes in `plugin.xml`, and build again.
+To release a new version, change `version = "1.2.0"` in `build.gradle.kts`, add its change notes in `plugin.xml`, and build again.
 
 
 
@@ -251,8 +251,9 @@ IntelliJ IDEA Community has no parser for JavaScript or JSP, so for web and conf
 **Rows**
 
 - Hover a row for its action bar: `↑ ↓ | Copy Note | Delete`. Arrows appear only when the row can move, and Note only on code lines.
-- Drag to reorder. Right-click for Move, Copy, Note, Jump to Source, Walk from Here, Tag and Delete. Double-click a line to open it.
+- Drag to reorder. Right-click for Move, Copy, Note, Jump to Source, Walk from Here, Connect Call To, Tag and Delete. Double-click a line to open it.
 - `Ctrl+C` copies the selection, `Delete` removes it.
+- **Connect calls by hand**: some calls can't be followed from the code, e.g. a REST / API request that is handled by a controller in another project. Right-click the calling line → **Connect Call To** → pick the method it reaches (the flow's other methods are listed; connected ones are checked, and picking one again removes it). The row shows `→ create()`, and the connection counts like a real call everywhere: Sync order, the Markdown diagrams and the nested Original Log. Connections are saved with the flow and included in **Export / Import**. **Remove Connections from This Line** clears them.
 - **Tags**: right-click → **Tag** → 🐞 Bug, ⭐ Important or ❓ Question (or No Tag). Tags show as coloured labels and are included in every copy format.
 - **Out-of-date lines**: when a saved line no longer matches the code, it gets an orange warning: *file missing*, *moved to line N* or *code changed*. Hover it for details. Right-click → **Re-link to Code** follows moved code, or takes the line's current code. **Re-link All Moved Lines** fixes every moved line at once.
 
@@ -270,15 +271,16 @@ IntelliJ IDEA Community has no parser for JavaScript or JSP, so for web and conf
 
 **Settings (⚙️)**
 
-| Option | What it does |
-|---|---|
-| Sync Files | Automatic call order |
-| Optimize Flat View Log | Flat View copy as a compact `[project]` / file / method log with `line \| code` rows |
-| Copy as Markdown | Copy as a `.md` document: summary table, Mermaid diagrams of the real calls, each method's lines as a table with syntax-highlighted code, and the **Original Log** at the end (see below) |
-| Sequence Diagram | In the Markdown copy, draw the calls as a Mermaid `sequenceDiagram` (files calling each other, with returns) instead of a `flowchart`. It follows the real calls from each entry method, whatever order the lines are listed in |
-| Copy All Flows | When on, the toolbar's **Copy** button copies every flow, one after the other under its name, in the Flows popup's order and the copy format chosen above. `Ctrl+C` still copies the selected lines |
-| Recycle Bin | Restore or permanently delete deleted lines and flows |
-| Info | Help dialog with all features, with a carousel of screenshots at the top |
+| Option | What it does | Default |
+|---|---|---|
+| Sync Files | Automatic call order | On |
+| Optimize Flat View Log | Flat View copy as a compact `[project]` / file / method log with `line \| code` rows | Off |
+| Copy as Markdown | Copy as a `.md` document: summary table, Mermaid diagrams of the real calls, each method's lines as a table with syntax-highlighted code, and the **Original Log** at the end (see below) | On |
+| Sequence Diagram | In the Markdown copy, draw the calls as a Mermaid `sequenceDiagram` (files calling each other, with returns) instead of a `flowchart`. It follows the real calls from each entry method, whatever order the lines are listed in | On |
+| Copy All Flows | When on, the toolbar's **Copy** button copies every flow, one after the other under its name, in the Flows popup's order and the copy format chosen above. `Ctrl+C` still copies the selected lines | On |
+| Nest Calls in Original Log | In the Markdown copy's Original Log, each called method's lines go right under the line that calls it, indented like a call stack (see below) | On |
+| Recycle Bin | Restore or permanently delete deleted lines and flows | |
+| Info | Help dialog with all features, with a carousel of screenshots at the top | |
 
 *Optimize Flat View Log* and *Copy as Markdown* exclude each other.
 
@@ -295,13 +297,41 @@ The code is colored with the same rules as the panel (keywords, types, strings, 
 
 In the Markdown diagrams, each box or column is titled with the file name and extension (for example `BookingService.java`, `travel.js`, `travel.tld`). Code that doesn't call between groups (for example a Java service, a script and a tag library) gets one diagram per group; a JSP page that calls Java methods is in the same diagram as them. Lines outside methods (fields, imports) are left out of the diagrams but stay in the details.
 
-Each flow's Markdown ends with an **Original Log** section: the plain copy of the current view in a text block, i.e. the indented text in Grouped View or the numbered steps in Flat View (exactly what **Copy** gives with *Copy as Markdown* off). With **Copy All Flows** on, every flow ends with its own Original Log.
+Each flow's Markdown ends with an **Original Log** section: the lines as plain text in a text block. With **Copy All Flows** on, every flow ends with its own Original Log.
+
+With **Nest Calls in Original Log** on (the default), each called method's lines sit right under the line that calls it, indented like a call stack. Code lines sit one tab (4 spaces) under their method, at every level, and an empty line closes each called block. The project is named only when it differs from the calling file's project (so a call into another project, e.g. an API, stands out). Grouped View:
 
 ```text
-1. BookingService.bookTrip():21 | if (customerName == null) {
-   note: Storing the Data
-2. HotelService.calculateCost():34 | return nights * rooms;
+Main.java  (TravelBooking)
+main()
+    8: DestinationService destinationService = new DestinationService();
+    13: List<Travel> packages = destinationService.search("", 15000, 4);
+        DestinationService.java
+        search()
+            21: if (maxBudget < 0 || maxDays <= 0) {
+
+    14: packages.forEach(System.out::println);
+    26: boolean cancelled = bookingService.cancelBooking(booking.getBookingId());
+        BookingService.java
+        cancelBooking()
+            55: Booking booking = bookings.get(bookingId);
+
+    27: System.out.println("Cancellation successful: " + cancelled);
 ```
+
+Flat View gives the same nesting as numbered steps:
+
+```text
+1. Main.main():8 | DestinationService destinationService = new DestinationService();
+2. Main.main():13 | List<Travel> packages = destinationService.search("", 15000, 4);
+    3. DestinationService.search():21 | if (maxBudget < 0 || maxDays <= 0) {
+
+4. Main.main():14 | packages.forEach(System.out::println);
+```
+
+A call from a line you didn't save goes under the saved line before it. A method called from several places is shown at its first call; the other calls point to it (`↳ search()  (DestinationService.java, shown above)` or `(see step 3)`).
+
+With the switch off, the Original Log is the plain copy of the current view: the file → method → lines list (Grouped) or the numbered steps (Flat), exactly what **Copy** gives with *Copy as Markdown* off.
 
 A Markdown copy with the sequence diagram, rendered in IntelliJ's Markdown preview:
 
@@ -374,7 +404,7 @@ The plugin passes the IntelliJ Platform Gradle plugin's checks for Marketplace (
 
 1. Sign in at [plugins.jetbrains.com](https://plugins.jetbrains.com) with your JetBrains account and open **Upload plugin** ([plugins.jetbrains.com/plugin/add](https://plugins.jetbrains.com/plugin/add)).
 2. Build the zip (`.\gradlew.bat clean buildPlugin`) and upload `build\distributions\flow-tracker-<version>.zip`.
-3. Fill in the form: vendor (create a vendor profile such as *Shopping Team 7* if asked), license **MIT** with the URL `https://github.com/RameshNR/flow-tracker/blob/main/LICENSE`, source code `https://github.com/RameshNR/flow-tracker`, category / tags (e.g. *Code tools*, *Navigation*).
+3. Fill in the form: vendor **RameshNR** (the same name as `<vendor>` in `plugin.xml`), license **MIT** with the URL `https://github.com/RameshNR/flow-tracker/blob/main/LICENSE`, source code `https://github.com/RameshNR/flow-tracker`, category / tags (e.g. *Code tools*, *Navigation*).
 4. Submit. JetBrains reviews new plugins before they appear (usually a couple of working days); you get an e-mail.
 5. On the plugin's page, **Edit → Media**: upload the screenshots from `src/main/resources/images` for the carousel in **Settings → Plugins**.
 
@@ -413,7 +443,7 @@ The report is written to `build\reports\tests\test\index.html`.
 
 
 
-[MIT](LICENSE) © 2026 Shopping Team 7.
+[MIT](LICENSE) © 2026 RameshNR.
 
 
 
@@ -430,6 +460,6 @@ The report is written to `build\reports\tests\test\index.html`.
 | Sync doesn't link two methods | Both methods need a saved line. Set a Project JDK in the sandbox project (*Setup SDK*). |
 | Lines show *moved to line N* | Lines follow edits made in an open editor. Changes made elsewhere (a Git pull, another tool, a closed file) can move code away from its saved line: right-click → **Re-link All Moved Lines**. |
 | Record adds nothing | Recording only adds lines in supported files, and only when the debugger actually stops (a breakpoint or a step). |
-| A diagram arrow is missing | Arrows link only methods that have a saved line, and only calls from Java, Kotlin, Groovy or JSP Java code. Set a Project JDK so calls resolve; Sync falls back to method names (and, for JSP, name plus number of arguments) when they don't. A name shared by several saved methods gets no arrow. |
+| A diagram arrow is missing | Arrows link only methods that have a saved line, and only calls the code shows (Java, Kotlin, Groovy, JSP Java code, JavaScript). For anything else, such as an API call into another project, right-click the calling line → **Connect Call To**. Set a Project JDK so calls resolve; Sync falls back to method names (and, for JSP, name plus number of arguments) when they don't. A name shared by several saved methods gets no arrow. |
 | `Alt+]` / `Alt+[` / `Ctrl+Alt+Shift+A` do nothing | Another plugin or keymap may use them. Rebind **Next Flow Step** / **Previous Flow Step** / **Add to Flow Tracker** in **Settings → Keymap**. |
 | The sandbox IDE misbehaves after many runs | Close it, delete `.intellijPlatform\sandbox`, and run the sandbox again (see [Commands](#commands)). |

@@ -146,6 +146,11 @@ final class FlowTheme {
         return IconLoader.getIcon("/icons/" + name + ".svg", FlowTheme.class);
     }
 
+    /** Space between a toolbar button and the popup it opens (small, so the popup still reads as the button's). */
+    static int popupGap() {
+        return JBUI.scale(4);
+    }
+
     /** Editor font at the size of the UI label font, so code rows line up with the rest of the tool window. */
     static Font codeFont() {
         Font editor = EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
