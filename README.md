@@ -38,7 +38,8 @@ Make sure you have the following installed:
 | Java (plugin code) | 25 | `build.gradle.kts` → `java.toolchain` |
 | Gradle | 9.6.0 | `gradle/wrapper/gradle-wrapper.properties` |
 | IntelliJ Platform Gradle Plugin | 2.19.0 | `build.gradle.kts` → `plugins` |
-| Plugin version | 1.1.0 | `build.gradle.kts` → `version` |
+| Plugin version | 1.1.1 | `build.gradle.kts` → `version` |
+| Plugin ID | `io.github.rameshnr.flowtracker` (never change it once published) | `plugin.xml` → `<id>` |
 
 
 
@@ -125,16 +126,16 @@ Check the folder: it must contain `product-info.json`. Write the path in `build.
 The installable plugin is written to:
 
 ```
-build\distributions\flow-tracker-1.1.0.zip
+build\distributions\flow-tracker-1.1.1.zip
 ```
 
 Install it in IntelliJ IDEA:
 
 - **Settings** → **Plugins** → ⚙️ → **Install Plugin from Disk…**
-- Select `build\distributions\flow-tracker-1.1.0.zip`
+- Select `build\distributions\flow-tracker-1.1.1.zip`
 - Restart the IDE when asked
 
-To release a new version, change `version = "1.1.0"` in `build.gradle.kts` and build again.
+To release a new version, change `version = "1.1.1"` in `build.gradle.kts`, add its change notes in `plugin.xml`, and build again.
 
 
 
@@ -367,22 +368,30 @@ The Info carousel also shows these when they exist (optional; add them with exac
 
 
 
-The build is set up for publishing; the secrets come from environment variables, never from files in the project.
+The plugin passes the IntelliJ Platform Gradle plugin's checks for Marketplace (`.\gradlew.bat verifyPluginProjectConfiguration verifyPluginStructure`). Its ID is `io.github.rameshnr.flowtracker`: Marketplace doesn't accept `com.example` IDs, and an ID can't change after the first upload.
 
-1. Create an account on [JetBrains Marketplace](https://plugins.jetbrains.com) and a **permanent token** (**Profile → My Tokens**).
-2. Optional but recommended: create a signing certificate ([Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html)).
-3. In PowerShell, set the variables for the current window:
+**First version (by hand, once).** JetBrains requires the first upload of a new plugin through the website:
+
+1. Sign in at [plugins.jetbrains.com](https://plugins.jetbrains.com) with your JetBrains account and open **Upload plugin** ([plugins.jetbrains.com/plugin/add](https://plugins.jetbrains.com/plugin/add)).
+2. Build the zip (`.\gradlew.bat clean buildPlugin`) and upload `build\distributions\flow-tracker-<version>.zip`.
+3. Fill in the form: vendor (create a vendor profile such as *Shopping Team 7* if asked), license **MIT** with the URL `https://github.com/RameshNR/flow-tracker/blob/main/LICENSE`, source code `https://github.com/RameshNR/flow-tracker`, category / tags (e.g. *Code tools*, *Navigation*).
+4. Submit. JetBrains reviews new plugins before they appear (usually a couple of working days); you get an e-mail.
+5. On the plugin's page, **Edit → Media**: upload the screenshots from `src/main/resources/images` for the carousel in **Settings → Plugins**.
+
+**Later versions (from Gradle).** The secrets come from environment variables, never from files in the project.
+
+1. Create a **permanent token**: [plugins.jetbrains.com](https://plugins.jetbrains.com) → your profile → **My Tokens**.
+2. Optional: a signing certificate ([Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html)). Marketplace accepts unsigned plugins too.
+3. In PowerShell, set the variables for the current window, bump `version` in `build.gradle.kts`, and publish:
    ```powershell
    $env:PUBLISH_TOKEN = "<your Marketplace token>"
    $env:CERTIFICATE_CHAIN = Get-Content -Raw chain.crt      # only when signing
    $env:PRIVATE_KEY = Get-Content -Raw private.pem          # only when signing
    $env:PRIVATE_KEY_PASSWORD = "<key password>"             # only when signing
    ```
-4. Publish (the first upload of a new plugin can also be done by hand on the Marketplace website with the zip from `buildPlugin`):
    ```shell
    .\gradlew.bat publishPlugin
    ```
-5. On the plugin's Marketplace page, add the screenshots under **Edit → Media** for the carousel, and a vendor e-mail / URL if the Marketplace asks for them.
 
 
 
@@ -397,6 +406,14 @@ The build is set up for publishing; the secrets come from environment variables,
 ```
 
 The report is written to `build\reports\tests\test\index.html`.
+
+
+
+## License
+
+
+
+[MIT](LICENSE) © 2026 Shopping Team 7.
 
 
 

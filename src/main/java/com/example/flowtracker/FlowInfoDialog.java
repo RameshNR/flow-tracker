@@ -56,7 +56,7 @@ final class FlowInfoDialog extends DialogWrapper {
     }
 
     private static String version() {
-        IdeaPluginDescriptor d = PluginManagerCore.getPlugin(PluginId.getId("com.example.flowtracker"));
+        IdeaPluginDescriptor d = PluginManagerCore.getPlugin(PluginId.getId("io.github.rameshnr.flowtracker"));
         return d == null || d.getVersion() == null ? "dev" : d.getVersion();
     }
 

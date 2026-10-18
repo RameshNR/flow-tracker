@@ -1,12 +1,20 @@
 <idea-plugin>
-    <id>com.example.flowtracker</id>
+    <!-- Permanent Marketplace ID: never change it after publishing. (The Java package name is separate.) -->
+    <id>io.github.rameshnr.flowtracker</id>
     <name>Flow Tracker</name>
-    <vendor>Shopping Team 7</vendor>
+    <vendor url="https://github.com/RameshNR/flow-tracker">Shopping Team 7</vendor>
     <!-- <version> and <idea-version since-build> are filled in by Gradle (build.gradle.kts). -->
 
     <!-- <description> comes from src/main/plugin-description.html (see build.gradle.kts). -->
 
     <change-notes><![CDATA[
+<h3>1.1.1</h3>
+<ul>
+  <li>New plugin ID for JetBrains Marketplace (<code>io.github.rameshnr.flowtracker</code>). If you installed
+      1.1.0 from a zip, uninstall it first: your saved flows are kept.</li>
+  <li>Plugin icon, and screenshots in the plugin description.</li>
+  <li>MIT license.</li>
+</ul>
 <h3>1.1.0</h3>
 <ul>
   <li>Add to Flow Tracker from the editor (right-click or Ctrl+Alt+Shift+A), step numbers in the gutter, and
