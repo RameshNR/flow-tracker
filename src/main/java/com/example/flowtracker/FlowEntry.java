@@ -1,0 +1,28 @@
+package com.example.flowtracker;
+
+/** One saved line. Public non-final fields so IntelliJ can serialize it to XML. */
+public class FlowEntry {
+    public String fileName = "";
+    public String fileUrl = "";
+    public String className = "";
+    public String methodName = "";
+    public int line;          // 1-based
+    public String text = "";
+    /** Optional short note, shown only in Flat View. */
+    public String note = "";
+    /** Gradle / Maven project the file belongs to (tells same-named files apart). */
+    public String projectName = "";
+    /** Optional colour tag: "" (none), "bug", "important" or "question" (see {@link FlowTag}). */
+    public String tag = "";
+
+    public FlowEntry() {}
+
+    public FlowEntry(String fileName, String fileUrl, String className, String methodName, int line, String text) {
+        this.fileName = fileName;
+        this.fileUrl = fileUrl;
+        this.className = className;
+        this.methodName = methodName;
+        this.line = line;
+        this.text = text;
+    }
+}

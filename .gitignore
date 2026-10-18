@@ -1,0 +1,21 @@
+# Gradle and build output
+.gradle/
+build/
+out/
+.kotlin/
+
+# Sandbox IDE and downloaded IntelliJ Platform files (re-created by .\gradlew.bat runIde)
+.intellijPlatform/
+
+# IntelliJ IDEA project settings (personal; the Gradle build is the source of truth)
+.idea/
+*.iml
+*.iws
+
+# Local Claude Code / MCP settings
+.claude/settings.local.json
+.mcp.json
+
+# OS files
+.DS_Store
+Thumbs.db

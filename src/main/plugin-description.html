@@ -1,0 +1,98 @@
+<!--
+  The plugin description: the Overview tab in Settings -> Plugins, and the JetBrains Marketplace page.
+  Gradle puts it into plugin.xml (build.gradle.kts -> pluginConfiguration.description).
+
+  Screenshots: each "img" comment pair below wraps one image from src/main/resources/images.
+  The IDE only loads description images from a web address, so set pluginImagesUrl in gradle.properties
+  to the public folder that holds them; the IMAGES placeholder is replaced with it. While pluginImagesUrl
+  is empty, those blocks are left out (no broken images). This header is not copied into plugin.xml.
+-->
+<p><b>Flow Tracker</b> helps you follow a code path through a Java, Kotlin or Java web project (JSP, JavaScript,
+TLD and more). While you read code, click the lines that matter. Flow Tracker collects them in a side panel, keeps
+them in <b>call order</b> automatically, and copies the whole flow as text, a compact log or a Markdown document.</p>
+
+<!--img--><p><img src="@IMAGES@/flow-tracker-grouped-view.png" alt="Grouped View: files, methods and saved lines with syntax colors" width="640"></p><!--/img-->
+
+<h3>Collect lines while you read</h3>
+<ul>
+  <li>Hover any line and click the <b>+</b> in the gutter to save it, together with its file, class, method,
+      line number and project. Works in Java, Kotlin, Groovy, JSP / tag files, JavaScript / TypeScript
+      (JS, JSX, TS, TSX), TLD, XML, HTML, properties, YAML and SQL files.</li>
+  <li><b>Add to Flow Tracker</b> from the editor's right-click menu or <b>Ctrl+Alt+Shift+A</b>: the caret line or
+      every selected line, as one undo step.</li>
+  <li><b>Record</b> with the debugger: every line where it stops (breakpoints and steps) is added in the order
+      it runs.</li>
+  <li>Saved lines show their <b>step number</b> in the gutter, with the method and note on hover, and follow
+      your edits in both views. Click the number to remove the line.</li>
+  <li><b>Add Bottom &darr; / Add Top &uarr;</b> chooses where new lines go.</li>
+  <li><b>Undo / Redo</b> revert adding, deleting and clearing lines.</li>
+  <li><b>Recycle Bin</b>: everything you delete (lines, cleared and deleted flows) can be restored later.</li>
+</ul>
+
+<h3>Named flows you can share</h3>
+<ul>
+  <li>Keep several named flows per project (e.g. <i>Flow 1: Checkout bug</i>), switch between them, and drag
+      them into the order you want.</li>
+  <li><b>Export</b> a flow as a <code>.flow.json</code> file (paths relative to the project) to commit or send,
+      and <b>Import</b> it on any machine.</li>
+  <li><b>Copy All Flows</b> switch: the Copy button copies every flow in one go.</li>
+  <li><b>Open Markdown</b> opens the flow as a Markdown file with the preview, diagrams included.</li>
+</ul>
+
+<h3>Two views</h3>
+<ul>
+  <li><b>Grouped View</b>: file &rarr; method &rarr; lines, with line numbers, syntax colors and a project
+      tag on each file, so files with the same name in different projects can't be confused.</li>
+  <li><b>Flat View</b>: one numbered sequence in flow order.</li>
+  <li><b>Search</b> to show only matching lines (code, file, method, note or tag).</li>
+</ul>
+
+<!--img--><p><img src="@IMAGES@/flow-tracker-flat-view.png" alt="Flat View: one numbered sequence in flow order" width="640"></p><!--/img-->
+
+<h3>Work with rows</h3>
+<ul>
+  <li><b>Hover action bar</b> on every row: &uarr; &darr; move | Copy, Note | Delete. It shows only the buttons
+      the row needs, and sticks to the visible edge when the code is long, so no scrolling is needed.</li>
+  <li><b>Drag and drop</b> files, methods and lines to reorder them.</li>
+  <li><b>Right-click menu</b>: Move Up/Down, Copy, Add/Edit Note, Jump to Source, Walk from Here, Tag, Delete.</li>
+  <li><b>Double-click</b> a line to jump to it. <b>Ctrl+C</b> copies, <b>Delete</b> removes.</li>
+  <li><b>Tags</b>: mark lines as Bug, Important or Question.</li>
+  <li>Lines that no longer match the code get a <b>warning</b> and can be re-linked in one click.</li>
+</ul>
+
+<!--img--><p><img src="@IMAGES@/flow-tracker-hover-actions.png" alt="Hover action bar on a row: move, copy, note and delete" width="640"></p><!--/img-->
+
+<h3>Walk through the flow</h3>
+<ul>
+  <li><b>Next Step / Previous Step</b> (<b>Alt+]</b> / <b>Alt+[</b>) open each saved line in the editor in turn,
+      with the step number, method and note in a hint. Great for code walkthroughs.</li>
+</ul>
+
+<h3>Sync: automatic call order</h3>
+<ul>
+  <li>With <b>Sync</b> on, a method comes first and the methods it calls follow right after the calling line,
+      across files: Java, Kotlin, Groovy, JSP pages calling Java, and JavaScript functions.</li>
+  <li>Moving anything by hand turns Sync off so your order is kept. One click re-sorts.</li>
+</ul>
+
+<h3>Copy the flow your way</h3>
+<ul>
+  <li><b>Default</b>: indented text (Grouped) or numbered steps (Flat).</li>
+  <li><b>Optimize Flat View Log</b>: a compact <code>[project]</code> / file / method log with
+      <code>line | code</code> rows.</li>
+  <li><b>Copy as Markdown</b>: a <code>.md</code> document with a summary table, Mermaid diagrams of the real
+      calls (flowchart or sequence diagram), each method's lines as a table with highlighted code, and the
+      Original Log at the end.</li>
+</ul>
+
+<!--img--><p><img src="@IMAGES@/flow-tracker-settings.png" alt="Settings: Sync Files, copy formats, Copy All Flows, Recycle Bin, Info" width="640"></p><!--/img-->
+<!--img--><p><img src="@IMAGES@/flow-tracker-markdown-copy.png" alt="Markdown copy rendered, with the call flow diagram" width="640"></p><!--/img-->
+
+<h3>Good to know</h3>
+<ul>
+  <li>Responsive toolbar: labels collapse to icons and wrap in narrow tool windows.</li>
+  <li>Follows your light or dark IDE theme. <b>Settings &rarr; Info</b> has all the help, with a screenshot
+      carousel.</li>
+  <li>Data is stored per project in <code>.idea/workspace.xml</code>. Nothing leaves your machine unless you
+      export a flow.</li>
+</ul>

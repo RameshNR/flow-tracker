@@ -1,0 +1,11 @@
+# Normalize text files; keep the scripts in the line endings their shells need.
+* text=auto
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+
+# Binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary

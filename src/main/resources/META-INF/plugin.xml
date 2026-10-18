@@ -1,0 +1,76 @@
+<idea-plugin>
+    <id>com.example.flowtracker</id>
+    <name>Flow Tracker</name>
+    <vendor>Shopping Team 7</vendor>
+    <!-- <version> and <idea-version since-build> are filled in by Gradle (build.gradle.kts). -->
+
+    <!-- <description> comes from src/main/plugin-description.html (see build.gradle.kts). -->
+
+    <change-notes><![CDATA[
+<h3>1.1.0</h3>
+<ul>
+  <li>Add to Flow Tracker from the editor (right-click or Ctrl+Alt+Shift+A), step numbers in the gutter, and
+      lines that follow edits in both views.</li>
+  <li>Open Markdown: the flow as a .md file with the preview. Calls between JavaScript functions get arrows.</li>
+  <li>Screenshot carousel in the Info dialog.</li>
+  <li>Support for JSP / tag files, JavaScript / TypeScript (JS, JSX, TS, TSX), TLD, XML, HTML, Groovy,
+      properties, YAML and SQL files.</li>
+  <li>Recycle Bin for deleted lines and flows; Copy All Flows.</li>
+  <li>Diagrams follow the real calls whatever order the lines are listed in (including JSP pages calling Java
+      methods), are titled by file name, and give unconnected code (e.g. Java and JavaScript) separate diagrams.</li>
+  <li>Markdown lines are a table (line, syntax-highlighted code, note) instead of numbers mixed into the code,
+      and each flow ends with its Original Log (the plain Grouped / Flat copy).</li>
+  <li>The Delete key removes selected items from the Recycle Bin.</li>
+  <li>Drag flows to reorder them.</li>
+  <li>Named flows per project, with Export / Import as <code>.flow.json</code> to share with your team.</li>
+  <li>Record a flow while debugging.</li>
+  <li>Walk-through: Next / Previous Step (Alt+] / Alt+[).</li>
+  <li>Mermaid sequence diagram option for the Markdown copy.</li>
+  <li>Search box, colour tags, warnings for lines that no longer match the code, and Kotlin support.</li>
+  <li>Row action bar order is now Copy, Note | Delete.</li>
+</ul>
+<h3>1.0.0</h3>
+<ul>
+  <li>Grouped and Flat views with syntax-colored code blocks and project tags.</li>
+  <li>Hover action bar (move, copy, note, delete), drag and drop, right-click menu.</li>
+  <li>Sync: automatic call order across files.</li>
+  <li>Copy formats: default text, optimized flat log, Markdown with a Mermaid flow diagram.</li>
+  <li>Undo / Redo for adding and removing lines.</li>
+  <li>Settings popup and Info dialog.</li>
+</ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Flow Tracker"
+                    anchor="right"
+                    icon="/icons/flowTracker.svg"
+                    factoryClass="com.example.flowtracker.FlowToolWindowFactory"/>
+        <editorFactoryListener implementation="com.example.flowtracker.FlowEditorFactoryListener"/>
+        <notificationGroup id="Flow Tracker" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <group id="FlowTracker.Menu" text="Flow Tracker" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="FlowTracker.AddLines" class="com.example.flowtracker.FlowAddAction"
+                    text="Add to Flow Tracker" description="Add the caret line or the selected lines to the Flow Tracker flow"
+                    icon="AllIcons.General.Add">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift A"/>
+                <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            </action>
+            <action id="FlowTracker.NextStep" class="com.example.flowtracker.FlowWalk$Next"
+                    text="Next Flow Step" description="Open the next saved line of the Flow Tracker flow"
+                    icon="/icons/tb_next.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt CLOSE_BRACKET"/>
+            </action>
+            <action id="FlowTracker.PreviousStep" class="com.example.flowtracker.FlowWalk$Previous"
+                    text="Previous Flow Step" description="Open the previous saved line of the Flow Tracker flow"
+                    icon="/icons/tb_prev.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt OPEN_BRACKET"/>
+            </action>
+        </group>
+    </actions>
+</idea-plugin>
