@@ -46,6 +46,10 @@ Make sure you have the following installed:
 
 
 
+**Just use the plugin:** download `flow-tracker-<version>.zip` from the [latest release](https://github.com/RameshNR/flow-tracker/releases/latest) (don't unzip it), then in IntelliJ IDEA 2026.2+ go to **Settings → Plugins → ⚙️ → Install Plugin from Disk…**, pick the zip and restart the IDE.
+
+**Build it yourself:**
+
 - Copy or clone this repository to any folder, for example `C:/Projects/flow-tracker`
 - Open `build.gradle.kts` and set `local("...")` to **your** IntelliJ IDEA installation path (see the next section):
   ```kotlin
