@@ -8,6 +8,37 @@
     <!-- <description> comes from src/main/plugin-description.html (see build.gradle.kts). -->
 
     <change-notes><![CDATA[
+<h3>1.2.1</h3>
+<ul>
+  <li>Flow Diagram: the flow as an editable diagram. Add classes and files (JSP, JavaScript, TLD...) and methods
+      from the project (search as you type, a pattern such as *Cruise*.java or a /regex/) and pick the method
+      lines to add, or add custom ones (drawn in amber) that aren't in the code yet; rename and remove them, and
+      draw calls between methods. Apply writes the changes to the flow as one undoable step; Cancel keeps it as it
+      was. A History with Undo / Redo stays after Apply, and changes that change nothing aren't added to it.</li>
+  <li>Flow Diagram: Change Class and Rename Class list the matching classes as you type; a name no class has becomes
+      a custom class. The buttons say Add File / Class, Add Method / Function, Custom Class / File and Custom
+      Method / Function.</li>
+  <li>Flow Diagram: Format a box (themes Plain, Light, Dark and eight colors, or its own class section, method
+      section and border colors with text that stays readable), class, file and method names and notes (bold,
+      italic, underline, strike-through, color), and a call's line (dashes, dots, double lines, widths, curved /
+      straight / elbow, arrow ends, color), with notes under class and method names. Reset in each Format window,
+      and Reset Theme for the whole diagram. Saved with the flow on Apply and in Export / Import.</li>
+  <li>Flow Diagram: boxes never overlap (the others make room when a box grows or is dropped on another) and lines
+      go around boxes in their way. Zoom buttons in the bottom right corner, Ctrl+mouse wheel and Ctrl+Plus /
+      Minus / 0; drag an empty spot to move the view.</li>
+  <li>Flow Diagram: click a method to see its lines of code under the diagram, with syntax colors; View Full Code
+      shows the whole file at that method.</li>
+  <li>Flow Diagram: Copy PNG and Copy Sequence PNG copy the diagram, or its calls as a sequence diagram, as an image,
+      with a light or dark background (split buttons). Settings for the images' default background and the
+      window's background, and a Dark / Light switch in the drawing area.</li>
+  <li>Settings: Use IntelliJ Theme takes every Flow Tracker color from the current IntelliJ theme and editor color
+      scheme (off: Flow Tracker's own colors).</li>
+  <li>Fixed: Copy, Open Markdown and Flow Diagram failing with an UnsupportedOperationException (Sync), and Export
+      Flow refreshing the new file on the UI thread.</li>
+  <li>No deprecated or internal IntelliJ Platform API in IntelliJ IDEA 2026.2 and 2026.3 (Plugin Verifier):
+      ReadAction.computeBlocking, JBUIScale.scale, OpenFileDescriptor.navigate for Walk-through and
+      Open Markdown, and the version in Info is read from the plugin itself.</li>
+</ul>
 <h3>1.2.0</h3>
 <ul>
   <li>Nest Calls in Original Log: each called method's lines sit under the line that calls it, in Grouped and
@@ -65,26 +96,26 @@
         <toolWindow id="Flow Tracker"
                     anchor="right"
                     icon="/icons/flowTracker.svg"
-                    factoryClass="com.example.flowtracker.FlowToolWindowFactory"/>
-        <editorFactoryListener implementation="com.example.flowtracker.FlowEditorFactoryListener"/>
+                    factoryClass="com.example.flowtracker.ui.FlowToolWindowFactory"/>
+        <editorFactoryListener implementation="com.example.flowtracker.editor.FlowEditorFactoryListener"/>
         <notificationGroup id="Flow Tracker" displayType="BALLOON"/>
     </extensions>
 
     <actions>
         <group id="FlowTracker.Menu" text="Flow Tracker" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="FlowTracker.AddLines" class="com.example.flowtracker.FlowAddAction"
+            <action id="FlowTracker.AddLines" class="com.example.flowtracker.editor.FlowAddAction"
                     text="Add to Flow Tracker" description="Add the caret line or the selected lines to the Flow Tracker flow"
                     icon="AllIcons.General.Add">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift A"/>
                 <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             </action>
-            <action id="FlowTracker.NextStep" class="com.example.flowtracker.FlowWalk$Next"
+            <action id="FlowTracker.NextStep" class="com.example.flowtracker.editor.FlowWalk$Next"
                     text="Next Flow Step" description="Open the next saved line of the Flow Tracker flow"
                     icon="/icons/tb_next.svg">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt CLOSE_BRACKET"/>
             </action>
-            <action id="FlowTracker.PreviousStep" class="com.example.flowtracker.FlowWalk$Previous"
+            <action id="FlowTracker.PreviousStep" class="com.example.flowtracker.editor.FlowWalk$Previous"
                     text="Previous Flow Step" description="Open the previous saved line of the Flow Tracker flow"
                     icon="/icons/tb_prev.svg">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt OPEN_BRACKET"/>

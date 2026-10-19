@@ -64,6 +64,33 @@ them in <b>call order</b> automatically, and copies the whole flow as text, a co
 
 <!--img--><p><img src="@IMAGES@/flow-tracker-hover-actions.png" alt="Hover action bar on a row: move, copy, note and delete" width="640"></p><!--/img-->
 
+<h3>Flow Diagram: draw and edit the flow</h3>
+<ul>
+  <li><b>Flow Diagram</b> (toolbar) opens the flow as a diagram: a box per class or file with its methods, and an
+      arrow for every call.</li>
+  <li><b>Add File / Class</b> searches the project as you type (3 letters, a pattern such as <code>*Cruise*.java</code>
+      or a <code>/regex/</code>); <b>Add Method / Function</b> filters the same way and shows the method's code so you
+      pick the lines to add.</li>
+  <li><b>Custom Class / File</b> and <b>Custom Method / Function</b> add ones that aren't in the code yet (drawn in amber);
+      <b>Connect</b> draws a call from one method to another; <b>Rename</b> and <b>Delete</b> change classes and methods.</li>
+  <li><b>Click a method</b> to see its lines of code under the diagram, with syntax colors; <b>View Full Code</b>
+      shows the whole file at that method.</li>
+  <li><b>Format</b>: box themes (Plain, Light, Dark and eight colors) or your own class section, method section and
+      border colors with text that stays readable; bold, italic, underline, strike-through and colored names and
+      notes; and call lines with dashes, dots, double lines, widths, curved / straight / elbow shapes and arrow ends.
+      <b>Reset Theme</b> brings back the default look.</li>
+  <li>Boxes never overlap and lines go around boxes in their way. <b>Zoom</b> with the corner buttons or Ctrl+mouse
+      wheel, and drag an empty spot to move the view.</li>
+  <li>Every change is listed in the <b>History</b>, with <b>Undo / Redo</b>; it stays after Apply. <b>Apply</b> writes
+      the changes, formats and notes to the flow as one undoable step; <b>Cancel</b> keeps the flow as it was.</li>
+  <li><b>Copy PNG</b> and <b>Copy Sequence PNG</b> copy the diagram, or its calls as a sequence diagram, as an image
+      with a light or dark background.</li>
+</ul>
+
+<!--img--><p><img src="@IMAGES@/flow-tracker-flow-diagram.png" alt="Flow Diagram: class boxes with methods, call arrows and the History" width="640"></p><!--/img-->
+<!--img--><p><img src="@IMAGES@/flow-tracker-diagram-themes.png" alt="A formatted Flow Diagram: box themes, notes and line styles" width="640"></p><!--/img-->
+<!--img--><p><img src="@IMAGES@/flow-tracker-diagram-code-panel.png" alt="Click a method to see its code under the diagram" width="640"></p><!--/img-->
+
 <h3>Walk through the flow</h3>
 <ul>
   <li><b>Next Step / Previous Step</b> (<b>Alt+]</b> / <b>Alt+[</b>) open each saved line in the editor in turn,
@@ -87,14 +114,14 @@ them in <b>call order</b> automatically, and copies the whole flow as text, a co
       Original Log at the end, with each call nested under the line that makes it.</li>
 </ul>
 
-<!--img--><p><img src="@IMAGES@/flow-tracker-settings.png" alt="Settings: Sync Files, copy formats, Copy All Flows, Recycle Bin, Info" width="640"></p><!--/img-->
+<!--img--><p><img src="@IMAGES@/flow-tracker-settings.png" alt="Settings: Sync Files, copy formats, Copy All Flows, Use IntelliJ Theme, Recycle Bin, Info" width="640"></p><!--/img-->
 <!--img--><p><img src="@IMAGES@/flow-tracker-markdown-copy.png" alt="Markdown copy rendered, with the call flow diagram" width="640"></p><!--/img-->
 
 <h3>Good to know</h3>
 <ul>
   <li>Responsive toolbar: labels collapse to icons and wrap in narrow tool windows.</li>
-  <li>Follows your light or dark IDE theme. <b>Settings &rarr; Info</b> has all the help, with a screenshot
-      carousel.</li>
+  <li>Follows your light or dark IDE theme; <b>Use IntelliJ Theme</b> takes every color from the current theme and
+      editor color scheme. <b>Settings &rarr; Info</b> has all the help, with a screenshot carousel.</li>
   <li>Data is stored per project in <code>.idea/workspace.xml</code>. Nothing leaves your machine unless you
       export a flow.</li>
 </ul>

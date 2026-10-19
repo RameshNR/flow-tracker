@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.rameshnr"
-version = "1.2.0"
+version = "1.2.1"
 
 repositories {
     mavenCentral()
@@ -36,6 +36,16 @@ tasks.test {
     useJUnitPlatform()
 }
 
+// The version shown in Settings ⚙️ → Info (read by FlowInfoDialog, without the IDE's internal plugin API).
+val writeVersion by tasks.registering {
+    val out = layout.buildDirectory.dir("generated/version")
+    val ver = project.version.toString()
+    inputs.property("version", ver)
+    outputs.dir(out)
+    doLast { out.get().file("flowtracker/version.properties").asFile.apply { parentFile.mkdirs(); writeText("version=$ver\n") } }
+}
+sourceSets.main { resources.srcDir(writeVersion) }
+
 // Web folder that holds the screenshots for the plugin description (gradle.properties -> pluginImagesUrl).
 val pluginImagesUrl = providers.gradleProperty("pluginImagesUrl").orElse("")
 
@@ -52,6 +62,14 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = "262"
             untilBuild = provider { null }
+        }
+    }
+
+    // .\gradlew.bat verifyPlugin: the same Plugin Verifier JetBrains Marketplace runs (deprecated / internal API usages).
+    pluginVerification {
+        ides {
+            local("C:/Users/RameshNR/AppData/Local/Programs/IntelliJ IDEA OSS")
+            create(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea, "263.7031.23")
         }
     }
 
